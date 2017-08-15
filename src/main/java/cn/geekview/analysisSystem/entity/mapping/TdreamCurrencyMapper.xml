@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamCurrencyMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamCurrency" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="currency_name" property="currencyName" jdbcType="VARCHAR" />
+    <result column="currency_nick" property="currencyNick" jdbcType="VARCHAR" />
+    <result column="currency_sign" property="currencySign" jdbcType="VARCHAR" />
+    <result column="currency_exchange" property="currencyExchange" jdbcType="DECIMAL" />
+    <result column="currency_status" property="currencyStatus" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, currency_name, currency_nick, currency_sign, currency_exchange, currency_status
+  </sql>
+  <select id="selectCurrencyList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_currency
+    where currency_status = 1
+  </select>
+</mapper>

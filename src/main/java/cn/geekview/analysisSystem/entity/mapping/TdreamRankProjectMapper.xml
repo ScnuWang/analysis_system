@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamRankProjectMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamRankProject" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="gv_index" property="gvIndex" jdbcType="INTEGER" />
+    <result column="product_id" property="productId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="ranking_national" property="rankingNational" jdbcType="INTEGER" />
+    <result column="ranking_world" property="rankingWorld" jdbcType="INTEGER" />
+    <result column="ranking_national_change" property="rankingNationalChange" jdbcType="INTEGER" />
+    <result column="ranking_world_change" property="rankingWorldChange" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, gv_index, product_id, update_date, ranking_national, ranking_world, ranking_national_change, 
+    ranking_world_change
+  </sql>
+ <delete id="deleteByUpdateDate">
+    delete from t_dream_rank_project where to_days(update_date) = to_days(#{updateDate,jdbcType=TIMESTAMP})
+  </delete>
+  
+  <update id="updateRankingInfo">
+    SET @rownum = 0;
+    UPDATE  t_dream_rank_project p,
+    (SELECT
+        @rownum :=@rownum + 1 AS rownum,
+        t.product_id
+    FROM
+        t_dream_rank_project t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    ORDER BY
+        t.gv_index DESC) l
+    set p.ranking_world = l.rownum
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP};
+    
+    SET @num = 0;
+    UPDATE  t_dream_rank_project p,
+    (SELECT
+        @num :=@num + 1 AS num,
+        t.product_id
+    FROM
+        t_dream_rank_project t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product dp,t_dream_website w
+                where t.product_id = dp.pk_id and dp.product_enabled = 1
+                  and dp.website = w.website_code and w.rank_status = 1 and w.website_type = 1)
+    ORDER BY
+        t.gv_index DESC) l
+    set p.ranking_national = l.num
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product d,t_dream_website w
+                where p.product_id = d.pk_id and d.product_enabled = 1
+                  and d.website = w.website_code and w.rank_status = 1 and w.website_type = 1);
+    
+    SET @num = 0;
+    UPDATE  t_dream_rank_project p,
+    (SELECT
+        @num :=@num + 1 AS num,
+        t.product_id
+    FROM
+        t_dream_rank_project t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product dp,t_dream_website w
+                where t.product_id = dp.pk_id and dp.product_enabled = 1
+                  and dp.website = w.website_code and w.rank_status = 1 and w.website_type = 2)
+    ORDER BY
+        t.gv_index DESC) l
+    set p.ranking_national = l.num
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product d,t_dream_website w
+                where p.product_id = d.pk_id and d.product_enabled = 1
+                  and d.website = w.website_code and w.rank_status = 1 and w.website_type = 2);
+    
+    update t_dream_rank_project t ,
+    (select * from t_dream_rank_project p where TO_DAYS(#{updateDate,jdbcType=TIMESTAMP})-TO_DAYS(p.update_date) = 1) l
+    set t.ranking_national_change = l.ranking_national-t.ranking_national,
+        t.ranking_world_change = l.ranking_world-t.ranking_world
+    where  l.product_id = t.product_id 
+     and t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+  </update>
+</mapper>

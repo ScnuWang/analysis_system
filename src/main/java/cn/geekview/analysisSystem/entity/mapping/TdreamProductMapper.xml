@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamProductMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProduct" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="website" property="website" jdbcType="INTEGER" />
+    <result column="original_id" property="originalId" jdbcType="VARCHAR" />
+    <result column="product_name" property="productName" jdbcType="VARCHAR" />
+    <result column="product_desc" property="productDesc" jdbcType="VARCHAR" />
+    <result column="product_url" property="productUrl" jdbcType="VARCHAR" />
+    <result column="product_image" property="productImage" jdbcType="VARCHAR" />
+    <result column="product_video" property="productVideo" jdbcType="VARCHAR" />
+    <result column="product_qrcode" property="productQrcode" jdbcType="VARCHAR" />
+    <result column="product_begin" property="productBegin" jdbcType="TIMESTAMP" />
+    <result column="product_end" property="productEnd" jdbcType="TIMESTAMP" />
+    <result column="forever_status" property="foreverStatus" jdbcType="INTEGER" />
+    <result column="product_enabled" property="productEnabled" jdbcType="INTEGER" />
+    <result column="product_status" property="productStatus" jdbcType="VARCHAR" />
+    <result column="status_value" property="statusValue" jdbcType="INTEGER" />
+    <result column="person_name" property="personName" jdbcType="VARCHAR" />
+    <result column="person_image" property="personImage" jdbcType="VARCHAR" />
+    <result column="person_desc" property="personDesc" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="currency_id" property="currencyId" jdbcType="INTEGER" />
+    <result column="average_money" property="averageMoney" jdbcType="DECIMAL" />
+    <result column="target_money_org" property="targetMoneyOrg" jdbcType="DECIMAL" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money_org" property="currMoneyOrg" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="item_core_price_org" property="itemCorePriceOrg" jdbcType="DECIMAL" />
+    <result column="item_core_price" property="itemCorePrice" jdbcType="DECIMAL" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="share_count" property="shareCount" jdbcType="INTEGER" />
+    <result column="focus_count" property="focusCount" jdbcType="INTEGER" />
+    <result column="like_count" property="likeCount" jdbcType="INTEGER" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="gv_index" property="gvIndex" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="remain_day" property="remainDay" jdbcType="INTEGER" />
+    <result column="product_image_us" property="productImageUs" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, website, original_id, product_name, product_desc, product_url, product_image, 
+    product_video, product_qrcode, product_begin, product_end, forever_status, product_enabled, 
+    product_status, status_value, person_name, person_image, person_desc, create_date, 
+    currency_id, average_money, target_money_org, target_money, curr_money_org, curr_money, 
+    item_core_price_org, item_core_price, support_person, share_count, focus_count, like_count, 
+    finish_per, gv_index, update_date, update_user, remain_day, product_image_us
+  </sql>
+  <select id="selectByOriginalId" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_product
+    where website = #{website,jdbcType=INTEGER}
+      and original_id = #{originalId,jdbcType=VARCHAR}
+    limit 1
+  </select>
+  <select id="getProductListByWebsiteCode" resultMap="BaseResultMap">
+    select
+     <include refid="Base_Column_List" />  
+     from t_dream_product
+    where website = #{website,jdbcType=INTEGER}
+    and product_enabled = 1
+  </select>
+  <insert id="insertRankByUpdateDate">
+    set @rownum=0;
+    insert into t_dream_rank_project (gv_index, product_id, update_date,ranking_world)
+    select p.gv_index,p.pk_id,p.update_date,@rownum:=@rownum+1 as rownum
+      from t_dream_product p,t_dream_website w
+     where p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+       and p.status_value = 2 and p.forever_status = 0 and p.product_enabled = 1
+       and p.website = w.website_code
+       and w.rank_status = 1
+   order by gv_index desc
+    </insert>
+ <insert id="insertPlatformAnalysis">
+  insert into t_dream_rank_platform (
+        website, target_money, curr_money, finish_per, support_person, project_count,update_date,recent_money,recent_support)
+    select website,sum(target_money),sum(curr_money),(sum(curr_money)/sum(target_money))*100,
+        sum(support_person),count(*),#{updateDate,jdbcType=TIMESTAMP},
+        IFNULL((select sum(g.growth_money) from t_dream_rank_growth g,t_dream_product p
+         where p.pk_id = g.product_id and p.website = #{website,jdbcType=INTEGER}
+           and TO_DAYS(#{updateDate,jdbcType=TIMESTAMP}) - TO_DAYS(g.update_date) &lt; #{day,jdbcType=INTEGER}),0),
+        IFNULL((select sum(g.growth_support) from t_dream_rank_growth g,t_dream_product p
+         where p.pk_id = g.product_id and p.website = #{website,jdbcType=INTEGER}
+           and TO_DAYS(#{updateDate,jdbcType=TIMESTAMP}) - TO_DAYS(g.update_date) &lt; #{day,jdbcType=INTEGER}),0)
+     from t_dream_product
+    where status_value not in (1,5)
+      and product_enabled = 1
+      and website = #{website,jdbcType=INTEGER}
+  </insert>
+  <select id="selectListByCategory" resultMap="BaseResultMap">
+    SELECT t.*
+     from t_dream_product t,t_dream_product_cate pc 
+    where t.pk_id = pc.product_id
+      and t.status_value &lt;&gt; 5
+      and product_enabled = 1
+      and pc.category_id = #{categoryId,jdbcType=INTEGER}
+  </select>
+  <select id="selectProductId" resultType="java.lang.Integer">
+    select pk_id
+    from t_dream_product
+    where website = #{website,jdbcType=INTEGER}
+      and original_id = #{originalId,jdbcType=VARCHAR}
+    limit 1
+  </select>
+  <select id="getProductById" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_product
+    where pk_id = #{pkId,jdbcType=INTEGER}
+    limit 1
+  </select>
+  <select id="selectHotProduct" resultMap="BaseResultMap">
+  select p.pk_id,p.product_name,p.product_status,p.status_value,p.product_image_us,p.forever_status,p.product_desc,
+         IFNULL(p.product_image_us,IFNULL(p.product_image,'https://s3.cn-north-1.amazonaws.com.cn/index/m/common/images/cover_default.jpg')) product_image, 
+         p.curr_money,p.curr_money_org,p.forever_status,
+         m.growth_money as 'growth_money',m.growth_money_org as 'growth_money_org',p.currency_id,c.currency_nick,
+         p.support_person,p.finish_per,p.remain_day,w.`name` as website_name,p.website
+   from ( 
+         select l.product_id,sum(l.growth_money) growth_money,sum(l.growth_money_org) growth_money_org 
+          from (
+                select t.product_id,t.growth_money,t.growth_money_org 
+                  from t_dream_rank_growth t where TO_DAYS(#{updateDate,jdbcType=TIMESTAMP}) - TO_DAYS(t.update_date) &lt; #{day,jdbcType=INTEGER}
+                   and TO_DAYS(#{updateDate,jdbcType=TIMESTAMP}) - TO_DAYS(t.update_date) &gt;= 0 
+               ) l GROUP BY l.product_id 
+        )m ,t_dream_product p,t_dream_currency c,t_dream_website w
+  where w.website_code = p.website
+    and w.rank_status = 1 
+    and c.pk_id = p.currency_id
+    and m.product_id = p.pk_id
+    and p.product_enabled = 1
+    ORDER BY m.growth_money DESC
+    limit 10
+  </select>
+</mapper>

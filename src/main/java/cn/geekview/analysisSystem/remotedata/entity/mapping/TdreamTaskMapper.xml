@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.geekview.analysisSystem.remotedata.entity.dao.TdreamTaskMapper">
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.remotedata.entity.model.TdreamTask">
+    <id column="pk_id" jdbcType="INTEGER" property="pkId" />
+    <result column="server_id" jdbcType="INTEGER" property="serverId" />
+    <result column="website_code" jdbcType="INTEGER" property="websiteCode" />
+    <result column="product_enabled" jdbcType="INTEGER" property="productEnabled" />
+    <result column="task_code" jdbcType="INTEGER" property="taskCode" />
+    <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
+    <result column="original_id" jdbcType="VARCHAR" property="originalId" />
+    <result column="product_url" jdbcType="VARCHAR" property="productUrl" />
+    <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+    <result column="task_remark" jdbcType="VARCHAR" property="taskRemark" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk_id, server_id, website_code, product_enabled, task_code, task_status, original_id, 
+    product_url, category_name, task_remark, update_date
+  </sql>
+
+  <select flushCache="true" id="selectCountByUpdateDate" resultType="java.lang.Integer" useCache="false">
+    select count(*)
+    from t_dream_task
+    where website_code = #{websiteCode,jdbcType=INTEGER}
+      and task_code &gt; 1032
+      and update_date = #{updateDate,jdbcType=TIMESTAMP}
+  </select>
+  
+  
+</mapper>

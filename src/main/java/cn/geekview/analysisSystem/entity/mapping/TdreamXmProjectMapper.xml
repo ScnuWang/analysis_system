@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamXmProjectMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamXmProject" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="original_id" property="originalId" jdbcType="VARCHAR" />
+    <result column="project_name" property="projectName" jdbcType="VARCHAR" />
+    <result column="project_desc" property="projectDesc" jdbcType="VARCHAR" />
+    <result column="project_url" property="projectUrl" jdbcType="VARCHAR" />
+    <result column="project_image" property="projectImage" jdbcType="VARCHAR" />
+    <result column="project_video" property="projectVideo" jdbcType="VARCHAR" />
+    <result column="project_qrcode" property="projectQrcode" jdbcType="VARCHAR" />
+    <result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+    <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+    <result column="project_status" property="projectStatus" jdbcType="VARCHAR" />
+    <result column="status_value" property="statusValue" jdbcType="INTEGER" />
+    <result column="focus_count" property="focusCount" jdbcType="INTEGER" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="money_currency" property="moneyCurrency" jdbcType="VARCHAR" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="remain_day" property="remainDay" jdbcType="INTEGER" />
+    <result column="person_name" property="personName" jdbcType="VARCHAR" />
+    <result column="person_image" property="personImage" jdbcType="VARCHAR" />
+    <result column="person_desc" property="personDesc" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, update_date, original_id, project_name, project_desc, project_url, project_image, 
+    project_video, project_qrcode, begin_date, end_date, project_status, status_value, 
+    focus_count, support_person, money_currency, target_money, curr_money, finish_per, 
+    remain_day, person_name, person_image, person_desc
+  </sql>
+  <resultMap extends="BaseResultMap" id="ViewResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamXmProject">
+    <result column="product_enabled" jdbcType="INTEGER" property="productEnabled" />
+    <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+    <collection javaType="list" ofType="cn.geekview.analysisSystem.entity.model.TdreamXmItem" property="itemList">
+        <result column="item_price" jdbcType="DECIMAL" property="itemPrice" />
+        <result column="item_support" jdbcType="INTEGER" property="itemSupport" />
+        <result column="item_total" jdbcType="INTEGER" property="itemTotal" />
+    </collection> 
+  </resultMap>
+   <select id="getProductByOriginIdWithDaySpace" resultMap="ViewResultMap" parameterType="java.util.HashMap">
+  select
+  <include refid="Base_Column_List"/>
+  from t_dream_xm_project
+  where original_id = #{originId,jdbcType=INTEGER}
+  and update_date &gt; #{beginDate,jdbcType=TIMESTAMP}
+  and update_date &lt; #{endDate,jdbcType=TIMESTAMP}
+  </select>
+
+  <select id="selectListByUpdateDate" resultMap="ViewResultMap">
+ SELECT
+    m.*, n.item_price,
+    n.item_support,
+    n.item_total
+FROM
+    (
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            t_dream_xm_project p
+        WHERE
+            p.update_date &gt; #{updateDate,jdbcType=TIMESTAMP} ) m 
+        LEFT JOIN (
+            SELECT
+                *
+            FROM
+                t_dream_xm_iterm i
+            WHERE
+                i.update_date &gt; #{updateDate,jdbcType=TIMESTAMP}) n 
+                ON m.pk_id = n.project_id
+  </select>
+  
+ <insert id="insertProduct" parameterType="cn.geekview.analysisSystem.entity.model.TdreamXmProject" >
+    insert into t_dream_product (
+      website, original_id, product_name, product_desc, product_url, 
+      product_image, product_video, product_qrcode, 
+      product_begin, product_end, 
+      forever_status,product_status, status_value,  product_enabled,
+      person_name,person_image, person_desc, remain_day,
+      like_count,share_count,create_date,update_date,update_user)
+    values (15, #{originalId,jdbcType=VARCHAR},#{projectName,jdbcType=VARCHAR}, #{projectDesc,jdbcType=VARCHAR}, #{projectUrl,jdbcType=VARCHAR}, 
+      #{projectImage,jdbcType=VARCHAR}, #{projectVideo,jdbcType=VARCHAR}, #{projectQrcode,jdbcType=VARCHAR}, 
+      #{beginDate,jdbcType=TIMESTAMP}, #{endDate,jdbcType=TIMESTAMP}, 
+      0 ,#{projectStatus,jdbcType=VARCHAR},#{statusValue,jdbcType=INTEGER}, 1,
+      #{personName,jdbcType=VARCHAR}, #{personImage,jdbcType=VARCHAR}, #{personDesc,jdbcType=VARCHAR},#{remainDay,jdbcType=INTEGER},
+       0 ,0 ,#{updateDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP},#{categoryName,jdbcType=VARCHAR})
+  </insert>
+  
+  <update id="updateProduct" parameterType="cn.geekview.analysisSystem.entity.model.TdreamXmProject" >
+     update t_dream_product
+    <set>
+      <if test="projectName != null">
+        product_name = #{projectName,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectUrl != null">
+        product_url = #{projectUrl,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectDesc != null">
+        product_desc = #{projectDesc,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectImage != null">
+        product_image = #{projectImage,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectVideo != null">
+        product_video = #{projectVideo,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectQrcode != null">
+        product_qrcode = #{projectQrcode,jdbcType=TIMESTAMP},
+      </if>
+      <if test="personName != null">
+        person_name = #{personName,jdbcType=TIMESTAMP},
+      </if>
+      <if test="personImage != null">
+        person_image = #{personImage,jdbcType=TIMESTAMP},
+      </if>
+      <if test="personDesc != null">
+        person_desc = #{personDesc,jdbcType=TIMESTAMP},
+      </if>
+      <if test="beginDate != null">
+        product_begin = #{beginDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endDate != null">
+        product_end = #{endDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="projectStatus != null">
+        product_status = #{projectStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="statusValue != null">
+        status_value = #{statusValue,jdbcType=INTEGER},
+      </if>
+      <if test="remainDay != null">
+        remain_day = #{remainDay,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        update_date = #{updateDate,jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where original_id = #{originalId,jdbcType=INTEGER}
+    and website = 15
+  </update>
+</mapper>

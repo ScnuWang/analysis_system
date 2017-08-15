@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamRankGrowthMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamRankGrowth" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="product_id" property="productId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="target_average" property="targetAverage" jdbcType="DECIMAL" />
+    <result column="curr_money_last" property="currMoneyLast" jdbcType="DECIMAL" />
+    <result column="curr_money_now" property="currMoneyNow" jdbcType="DECIMAL" />
+    <result column="growth_money" property="growthMoney" jdbcType="DECIMAL" />
+    <result column="curr_money_last_org" property="currMoneyLastOrg" jdbcType="DECIMAL" />
+    <result column="curr_money_now_org" property="currMoneyNowOrg" jdbcType="DECIMAL" />
+    <result column="growth_money_org" property="growthMoneyOrg" jdbcType="DECIMAL" />
+    <result column="support_last" property="supportLast" jdbcType="INTEGER" />
+    <result column="support_now" property="supportNow" jdbcType="INTEGER" />
+    <result column="growth_support" property="growthSupport" jdbcType="INTEGER" />
+    <result column="growth_speed" property="growthSpeed" jdbcType="INTEGER" />
+    <result column="ranking_national" property="rankingNational" jdbcType="INTEGER" />
+    <result column="ranking_world" property="rankingWorld" jdbcType="INTEGER" />
+    <result column="ranking_national_change" property="rankingNationalChange" jdbcType="INTEGER" />
+    <result column="ranking_world_change" property="rankingWorldChange" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, product_id, update_date, target_money, target_average, curr_money_last, curr_money_now, 
+    growth_money, curr_money_last_org, curr_money_now_org, growth_money_org, support_last, 
+    support_now, growth_support, growth_speed, ranking_national, ranking_world, ranking_national_change, 
+    ranking_world_change
+  </sql>
+  <update id="deleteByUpdateDate">
+    update t_dream_rank_growth t
+      set t.ranking_world = null,t.ranking_national = null,
+          t.ranking_national_change = null,t.ranking_world_change = null
+    where to_days(update_date) = to_days(#{updateDate,jdbcType=TIMESTAMP})
+  </update>
+  <update id="updateRankingInfo">
+    SET @rownum = 0;
+    UPDATE  t_dream_rank_growth p,
+    (SELECT
+        @rownum :=@rownum + 1 AS rownum,
+        t.product_id
+    FROM
+        t_dream_rank_growth t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product dp,t_dream_website w
+        where t.product_id = dp.pk_id and dp.product_enabled = 1
+          and dp.website = w.website_code and w.rank_status = 1)
+    ORDER BY
+        t.growth_money DESC) l
+    set p.ranking_world = l.rownum
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP};
+    
+    SET @num = 0;
+    UPDATE  t_dream_rank_growth p,
+    (SELECT
+        @num :=@num + 1 AS num,
+        t.product_id
+    FROM
+        t_dream_rank_growth t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product dp,t_dream_website w
+        where t.product_id = dp.pk_id and dp.product_enabled = 1
+          and dp.website = w.website_code and w.rank_status = 1 and w.website_type = 1)
+    ORDER BY
+        t.growth_money DESC) l
+    set p.ranking_national = l.num
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product d,t_dream_website w
+    where p.product_id = d.pk_id and d.product_enabled = 1
+      and d.website = w.website_code and w.rank_status = 1 and w.website_type = 1);
+    
+    SET @num = 0;
+    UPDATE  t_dream_rank_growth p,
+    (SELECT
+        @num :=@num + 1 AS num,
+        t.product_id
+    FROM
+        t_dream_rank_growth t
+    WHERE
+        t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product dp,t_dream_website w
+        where t.product_id = dp.pk_id and dp.product_enabled = 1
+          and dp.website = w.website_code and w.rank_status = 1 and w.website_type = 2)
+    ORDER BY
+        t.growth_money DESC) l
+    set p.ranking_national = l.num
+    where p.product_id = l.product_id
+    and p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and EXISTS (select 1 from t_dream_product d,t_dream_website w
+    where p.product_id = d.pk_id and d.product_enabled = 1
+      and d.website = w.website_code and w.rank_status = 1 and w.website_type = 2);
+    
+    
+    update t_dream_rank_growth t ,
+    (select * from t_dream_rank_growth p where TO_DAYS(#{updateDate,jdbcType=TIMESTAMP})-TO_DAYS(p.update_date) = 1
+     and p.ranking_national is not null and p.ranking_world is not null ) l
+    set t.ranking_national_change = l.ranking_national-t.ranking_national,
+        t.ranking_world_change = l.ranking_world-t.ranking_world
+    where  l.product_id = t.product_id 
+     and TO_DAYS(t.update_date) = TO_DAYS(#{updateDate,jdbcType=TIMESTAMP})
+     and t.ranking_national is not null and t.ranking_world is not null 
+  </update>
+  
+   <insert id="insert" parameterType="cn.geekview.analysisSystem.entity.model.TdreamRankGrowth">
+    insert into t_dream_rank_growth (pk_id, product_id, update_date, 
+      target_money, target_average, curr_money_last, 
+      curr_money_now, growth_money, curr_money_last_org, 
+      curr_money_now_org, growth_money_org, support_last, 
+      support_now, growth_support, growth_speed, 
+      ranking_national, ranking_world, ranking_national_change, 
+      ranking_world_change)
+    values (#{pkId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{targetMoney,jdbcType=DECIMAL}, #{targetAverage,jdbcType=DECIMAL}, #{currMoneyLast,jdbcType=DECIMAL}, 
+      #{currMoneyNow,jdbcType=DECIMAL}, #{growthMoney,jdbcType=DECIMAL}, #{currMoneyLastOrg,jdbcType=DECIMAL}, 
+      #{currMoneyNowOrg,jdbcType=DECIMAL}, #{growthMoneyOrg,jdbcType=DECIMAL}, #{supportLast,jdbcType=INTEGER}, 
+      #{supportNow,jdbcType=INTEGER}, #{growthSupport,jdbcType=INTEGER}, #{growthSpeed,jdbcType=INTEGER}, 
+      #{rankingNational,jdbcType=INTEGER}, #{rankingWorld,jdbcType=INTEGER}, #{rankingNationalChange,jdbcType=INTEGER}, 
+      #{rankingWorldChange,jdbcType=INTEGER})
+  </insert>
+  <delete id="deleteByProductId">
+    DELETE FROM
+    t_dream_rank_growth 
+    WHERE update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and product_id = #{productId,jdbcType=INTEGER}
+  </delete>
+   <select id="selectListByProductId" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_rank_growth
+    where product_id = #{productId,jdbcType=VARCHAR}
+    order by update_date asc
+  </select>
+</mapper>

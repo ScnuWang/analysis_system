@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamProductTempMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProductTemp" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="website" property="website" jdbcType="INTEGER" />
+    <result column="original_id" property="originalId" jdbcType="VARCHAR" />
+    <result column="product_name" property="productName" jdbcType="VARCHAR" />
+    <result column="product_desc" property="productDesc" jdbcType="VARCHAR" />
+    <result column="product_url" property="productUrl" jdbcType="VARCHAR" />
+    <result column="product_image" property="productImage" jdbcType="VARCHAR" />
+    <result column="product_video" property="productVideo" jdbcType="VARCHAR" />
+    <result column="product_qrcode" property="productQrcode" jdbcType="VARCHAR" />
+    <result column="product_begin" property="productBegin" jdbcType="TIMESTAMP" />
+    <result column="product_end" property="productEnd" jdbcType="TIMESTAMP" />
+    <result column="forever_status" property="foreverStatus" jdbcType="INTEGER" />
+    <result column="product_enabled" property="productEnabled" jdbcType="INTEGER" />
+    <result column="product_status" property="productStatus" jdbcType="VARCHAR" />
+    <result column="status_value" property="statusValue" jdbcType="INTEGER" />
+    <result column="person_name" property="personName" jdbcType="VARCHAR" />
+    <result column="person_image" property="personImage" jdbcType="VARCHAR" />
+    <result column="person_desc" property="personDesc" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="currency_id" property="currencyId" jdbcType="INTEGER" />
+    <result column="average_money" property="averageMoney" jdbcType="DECIMAL" />
+    <result column="target_money_org" property="targetMoneyOrg" jdbcType="DECIMAL" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money_org" property="currMoneyOrg" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="item_core_price_org" property="itemCorePriceOrg" jdbcType="DECIMAL" />
+    <result column="item_core_price" property="itemCorePrice" jdbcType="DECIMAL" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="share_count" property="shareCount" jdbcType="INTEGER" />
+    <result column="focus_count" property="focusCount" jdbcType="INTEGER" />
+    <result column="like_count" property="likeCount" jdbcType="INTEGER" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="gv_index" property="gvIndex" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="remain_day" property="remainDay" jdbcType="INTEGER" />
+    <result column="product_image_us" property="productImageUs" jdbcType="VARCHAR" />
+    <result column="keyword" property="keyword" jdbcType="VARCHAR" />
+    <result column="comp_status" property="compStatus" jdbcType="INTEGER" />
+    
+    <result column="website_type" jdbcType="INTEGER" property="websiteType" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, website, original_id, product_name, product_desc, product_url, product_image, 
+    product_video, product_qrcode, product_begin, product_end, forever_status, product_enabled, 
+    product_status, status_value, person_name, person_image, person_desc, create_date, 
+    currency_id, average_money, target_money_org, target_money, curr_money_org, curr_money, 
+    item_core_price_org, item_core_price, support_person, share_count, focus_count, like_count, 
+    finish_per, gv_index, update_date, update_user, remain_day, product_image_us, keyword, 
+    comp_status
+  </sql>
+  
+   <select id="selectNewProductList" resultMap="BaseResultMap">
+    select 
+        p.pk_id,p.website,p.original_id,p.product_enabled,p.product_name,p.product_desc,p.person_name,p.person_desc,p.status_value,p.product_status,p.product_url,
+        p.create_date,p.support_person,p.share_count,p.like_count,p.focus_count,p.curr_money,p.item_core_price,w.website_type
+    from t_dream_product p,t_dream_website w
+    WHERE status_value != 5 and p.product_enabled = 1
+    and p.website = w.website_code
+    AND NOT EXISTS (
+        SELECT 1 FROM t_dream_product_temp t WHERE p.pk_id = t.pk_id
+    )
+  </select>
+  
+   <update id="updateProductEnabled">
+    UPDATE t_dream_product p,t_dream_product_temp t
+       SET t.status_value = p.status_value
+     WHERE t.pk_id = p.pk_id
+      and t.status_value != p.status_value;
+       
+    UPDATE t_dream_product p,t_dream_product_temp t
+       SET p.product_enabled = 0
+     WHERE t.pk_id = p.pk_id
+       AND t.keyword  = '0' ;
+    
+    UPDATE t_dream_product_temp t, t_dream_product p
+       SET t.keyword = 0,t.product_enabled = 0
+     WHERE t.pk_id = p.pk_id
+       AND p.product_enabled = 0 ;
+       
+   UPDATE t_dream_product t, t_dream_product_temp p
+	SET t.target_money_org = p.target_money_org,
+	 t.curr_money_org = p.curr_money_org,
+	 t.item_core_price_org = p.item_core_price_org,
+	 t.gv_index = p.gv_index,
+	 t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+	WHERE
+	    t.pk_id = p.pk_id;
+       
+    delete from t_dream_product_cate 
+     where  EXISTS
+            (select 1 from t_dream_product p 
+              where p.pk_id = t_dream_product_cate.product_id 
+               and p.product_enabled = 0);
+  </update>
+  
+  <insert id="insert" parameterType="cn.geekview.analysisSystem.entity.model.TdreamProductTemp" >
+    insert into t_dream_product_temp (pk_id, website,original_id,
+      product_name, product_desc, product_url, support_person,share_count,like_count,focus_count,curr_money,item_core_price,
+      product_enabled, product_status, status_value, 
+      person_name, person_desc,create_date, keyword,comp_status,
+      target_money_org,curr_money_org,item_core_price_org,gv_index)
+    values (#{pkId,jdbcType=INTEGER}, #{website,jdbcType=INTEGER},#{originalId,jdbcType=INTEGER},
+      #{productName,jdbcType=VARCHAR}, #{productDesc,jdbcType=VARCHAR}, #{productUrl,jdbcType=VARCHAR}, 
+      #{supportPerson,jdbcType=INTEGER}, 
+       #{shareCount,jdbcType=INTEGER},
+        #{focusCount,jdbcType=INTEGER},
+         #{likeCount,jdbcType=INTEGER},
+         #{currMoney,jdbcType=DECIMAL},
+         #{itemCorePrice,jdbcType=DECIMAL},
+      #{productEnabled,jdbcType=INTEGER}, #{productStatus,jdbcType=VARCHAR}, #{statusValue,jdbcType=INTEGER}, 
+      #{personName,jdbcType=VARCHAR}, #{personDesc,jdbcType=VARCHAR},#{createDate,jdbcType=TIMESTAMP},
+      #{keyword,jdbcType=VARCHAR}, #{compStatus,jdbcType=INTEGER},
+      #{targetMoneyOrg,jdbcType=DECIMAL},#{currMoneyOrg,jdbcType=DECIMAL},
+      #{itemCorePriceOrg,jdbcType=DECIMAL},#{gvIndex,jdbcType=INTEGER})
+  </insert>
+  
+  
+   <update id="updateByPrimaryKey" parameterType="cn.geekview.analysisSystem.entity.model.TdreamProductTemp">
+    update t_dream_product_temp
+    set website = #{website,jdbcType=INTEGER},
+      product_name = #{productName,jdbcType=VARCHAR},
+      product_desc = #{productDesc,jdbcType=VARCHAR},
+      product_url = #{productUrl,jdbcType=VARCHAR},
+      product_enabled = #{productEnabled,jdbcType=INTEGER},
+      product_status = #{productStatus,jdbcType=VARCHAR},
+      status_value = #{statusValue,jdbcType=INTEGER},
+      person_name = #{personName,jdbcType=VARCHAR},
+      person_desc = #{personDesc,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      keyword = #{keyword,jdbcType=VARCHAR},
+      comp_status = #{compStatus,jdbcType=INTEGER},
+      target_money_org = #{targetMoneyOrg,jdbcType=DECIMAL},
+      curr_money_org = #{currMoneyOrg,jdbcType=DECIMAL},
+      item_core_price_org = #{itemCorePriceOrg,jdbcType=DECIMAL},
+      gv_index = #{gvIndex,jdbcType=INTEGER}
+    where pk_id = #{pkId,jdbcType=INTEGER}
+  </update>
+  
+  <select id="selectNoClassifyList" resultMap="BaseResultMap">
+    select      
+        pk_id, website, product_name, product_desc, product_url,product_enabled, 
+        product_status, status_value, person_name, person_desc, create_date,keyword,comp_status,average_money,target_money_org, target_money, curr_money_org, curr_money, 
+    item_core_price_org, item_core_price,support_person, share_count, focus_count, like_count, 
+    finish_per, gv_index
+    from t_dream_product_temp p
+    WHERE p.status_value != 5 AND p.product_enabled = 1
+    and p.comp_status = 0
+    AND NOT EXISTS (
+        SELECT 1 FROM t_dream_product_cate c WHERE c.product_id = p.pk_id 
+    )  
+  </select>
+</mapper>

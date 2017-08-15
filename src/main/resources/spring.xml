@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/cache
+        http://www.springframework.org/schema/cache/spring-cache-4.3.xsd  
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-4.3.xsd">
+
+	<bean class="cn.geekview.analysisSystem.listener.ParameterInitListener"/>
+	<bean class="cn.geekview.analysisSystem.utils.EncryptPropertityUtil" p:location="classpath:dbconfig.properties"/>
+    <context:component-scan base-package="cn.geekview.analysisSystem.service" />
+    <context:component-scan base-package="cn.geekview.analysisSystem.remotedata.service" />
+    <task:annotation-driven/>
+    <context:annotation-config />
+    
+     <!-- freemaker配置 -->
+    <bean id="freemarkerConfig"  class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">  
+        <property name="templateLoaderPath" value="/WEB-INF/ftl/" />  
+        <property name="freemarkerSettings">  
+            <props>  
+                <prop key="template_update_delay">0</prop>  
+                <prop key="default_encoding">UTF-8</prop>  
+                <prop key="number_format">###.##</prop>  
+                <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>  
+                <prop key="classic_compatible">true</prop>  
+                <prop key="template_exception_handler">ignore</prop>  
+				<prop key="auto_import">
+				</prop>
+            </props>  
+        </property>  
+    </bean>
+    <bean id="springContextsUtil" class="cn.geekview.analysisSystem.utils.SpringContextsUtil" />
+    
+    <cache:annotation-driven/>
+    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="selectAll"/>
+            </set>
+        </property>
+    </bean>
+</beans>

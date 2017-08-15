@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamCompetitorMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamCompetitor" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="INTEGER" />
+    <result column="comp_name" property="compName" jdbcType="VARCHAR" />
+    <result column="comp_desc" property="compDesc" jdbcType="VARCHAR" />
+    <result column="comp_kwords" property="compKwords" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, category_id, comp_name, comp_desc, comp_kwords
+  </sql>
+ <select id="selectByCompKwords" resultMap="BaseResultMap"  >
+    select * from t_dream_competitor t where t.comp_kwords REGEXP CONCAT('[[:&lt;:]]',#{compKwords,jdbcType=VARCHAR},'[[:&gt;:]]')
+    UNION 
+    select * from t_dream_competitor t where t.comp_kwords like CONCAT('%',#{compKwords,jdbcType=VARCHAR},'%') 
+    limit 1
+  </select>
+
+  
+   <select id="getCompetitorByCategoryId" parameterType="java.lang.Integer" resultType="cn.geekview.analysisSystem.entity.model.TdreamCompetitor">
+    SELECT
+    c.pk_id as "pkId", c.comp_name as "compName",c.category_id as "categoryId",
+    e.competitor_id as "competitorId", e.update_date as "updateDate", e.top_product_money as "topProductMoney", e.top_product_money_id "topProductMoneyId",
+    e.low_product_money as "lowProductMoney", e.low_product_money_id as "lowProductMoneyId", e.top_product_people as "topProductPeople", e.top_product_people_id as "topProductPeopleId",
+    e.low_product_people as "lowProductPeople", e.top_product_people_id_corePrice as topProductPeopleIdCoreprice,
+    e.low_peoduct_people_id as "lowPeoductPeopleId", e.low_corePrice as "lowCoreprice", e.low_corePrice_product_id "lowCorepriceProductId",
+    e.top_coreProce as "topCoreproce", e.top_corePrice_product_id as "topCorepriceProductId"
+    FROM
+        t_dream_competitor c,
+        t_dream_competitor_extra e
+    WHERE
+        c.category_id = #{categoryId,jdbcType=INTEGER}
+    AND e.competitor_id = c.pk_id
+    AND e.category_id = #{categoryId,jdbcType=INTEGER}
+  </select> 
+  
+  <select id="getCompetitorListByKeyword" resultMap="BaseResultMap">
+ 
+    select * from t_dream_competitor t where t.comp_kwords like CONCAT('%',#{keyword,jdbcType=VARCHAR},'%') 
+  </select>
+  
+  <select id="selectNewCompetitorList" resultMap="BaseResultMap">
+    SELECT
+    t.pk_id,
+    t.category_id
+	FROM
+	    t_dream_competitor t
+	WHERE
+	    t.pk_id NOT IN (
+	        SELECT
+	            e.pk_id
+	        FROM
+	            t_dream_competitor_extra e
+	    )
+  </select>
+  <select id="selectAllCompetitor" resultMap="BaseResultMap">
+	  select 
+	  <include refid="Base_Column_List"/>
+	  from t_dream_competitor
+  </select>
+  
+  
+</mapper>

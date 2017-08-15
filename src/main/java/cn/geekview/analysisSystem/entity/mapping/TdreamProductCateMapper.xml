@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamProductCateMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProductCate" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="product_id" property="productId" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="INTEGER" />
+    <result column="related_status" property="relatedStatus" jdbcType="INTEGER" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="website" property="website" jdbcType="INTEGER" />
+    <result column="comp_id" property="compId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, product_id, category_id, related_status, update_user, update_date, website, 
+    comp_id
+  </sql>
+  <select id="selectByProductId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_product_cate
+    where product_id = #{productId,jdbcType=INTEGER}
+    limit 1
+  </select>
+  
+  <insert id="insertFromProgram" parameterType="cn.geekview.analysisSystem.entity.model.TdreamProductCate" >
+    insert into t_dream_product_cate (pk_id, product_id, category_id, 
+      related_status, update_user, update_date, 
+      website, comp_id)
+    values (#{pkId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, 
+      1, '程序J', now(), #{website,jdbcType=INTEGER}, #{compId,jdbcType=INTEGER})
+  </insert>
+  
+  <select id="getProductListByCompetitorId" resultMap="ProductResultMap" parameterType="java.lang.Integer" >
+	  SELECT
+	    <include refid="Product_Column_List"/>
+		FROM
+		    t_dream_product t
+		WHERE
+		    t.pk_id IN (
+		        SELECT
+		            c.product_id
+		        FROM
+		            t_dream_product_cate c
+		        WHERE
+		            c.comp_id = #{competitorId,jdbcType=INTEGER}
+		    )
+		ORDER BY t.curr_money DESC
+  </select>
+  
+  <select id="getProductListByCompetitorIdLimit" resultMap="ProductResultMap" parameterType="java.lang.Integer" >
+      SELECT
+        <include refid="Product_Column_List"/>
+        FROM
+            t_dream_product t
+        WHERE
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER}
+            )
+        ORDER BY t.curr_money DESC
+        limit 0,#{limitsize,jdbcType=INTEGER}
+  </select>
+  
+  
+  <resultMap id="ProductResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProduct" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="website" property="website" jdbcType="INTEGER" />
+    <result column="original_id" property="originalId" jdbcType="VARCHAR" />
+    <result column="product_name" property="productName" jdbcType="VARCHAR" />
+    <result column="product_desc" property="productDesc" jdbcType="VARCHAR" />
+    <result column="product_url" property="productUrl" jdbcType="VARCHAR" />
+    <result column="product_image" property="productImage" jdbcType="VARCHAR" />
+    <result column="product_video" property="productVideo" jdbcType="VARCHAR" />
+    <result column="product_qrcode" property="productQrcode" jdbcType="VARCHAR" />
+    <result column="product_begin" property="productBegin" jdbcType="TIMESTAMP" />
+    <result column="product_end" property="productEnd" jdbcType="TIMESTAMP" />
+    <result column="forever_status" property="foreverStatus" jdbcType="INTEGER" />
+    <result column="product_enabled" property="productEnabled" jdbcType="INTEGER" />
+    <result column="product_status" property="productStatus" jdbcType="VARCHAR" />
+    <result column="status_value" property="statusValue" jdbcType="INTEGER" />
+    <result column="person_name" property="personName" jdbcType="VARCHAR" />
+    <result column="person_image" property="personImage" jdbcType="VARCHAR" />
+    <result column="person_desc" property="personDesc" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="currency_id" property="currencyId" jdbcType="INTEGER" />
+    <result column="average_money" property="averageMoney" jdbcType="DECIMAL" />
+    <result column="target_money_org" property="targetMoneyOrg" jdbcType="DECIMAL" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money_org" property="currMoneyOrg" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="item_core_price_org" property="itemCorePriceOrg" jdbcType="DECIMAL" />
+    <result column="item_core_price" property="itemCorePrice" jdbcType="DECIMAL" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="share_count" property="shareCount" jdbcType="INTEGER" />
+    <result column="focus_count" property="focusCount" jdbcType="INTEGER" />
+    <result column="like_count" property="likeCount" jdbcType="INTEGER" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="gv_index" property="gvIndex" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="remain_day" property="remainDay" jdbcType="INTEGER" />
+    <result column="product_image_us" property="productImageUs" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Product_Column_List" >
+    pk_id, website, original_id, product_name, product_desc, product_url, product_image, 
+    product_video, product_qrcode, product_begin, product_end, forever_status, product_enabled, 
+    product_status, status_value, person_name, person_image, person_desc, create_date, 
+    currency_id, average_money, target_money_org, target_money, curr_money_org, curr_money, 
+    item_core_price_org, item_core_price, support_person, share_count, focus_count, like_count, 
+    finish_per, gv_index, update_date, update_user, remain_day, product_image_us
+  </sql>
+</mapper>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamCompetitorExtraMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamCompetitorExtra" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="competitor_id" property="competitorId" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="top_product_money" property="topProductMoney" jdbcType="DECIMAL" />
+    <result column="top_product_money_id" property="topProductMoneyId" jdbcType="INTEGER" />
+    <result column="low_product_money" property="lowProductMoney" jdbcType="DECIMAL" />
+    <result column="low_product_money_id" property="lowProductMoneyId" jdbcType="INTEGER" />
+    <result column="top_product_people" property="topProductPeople" jdbcType="INTEGER" />
+    <result column="top_product_people_id" property="topProductPeopleId" jdbcType="INTEGER" />
+    <result column="top_product_people_id_corePrice" property="topProductPeopleIdCoreprice" jdbcType="DECIMAL" />
+    <result column="low_product_people" property="lowProductPeople" jdbcType="INTEGER" />
+    <result column="low_peoduct_people_id" property="lowPeoductPeopleId" jdbcType="INTEGER" />
+    <result column="low_corePrice" property="lowCoreprice" jdbcType="DECIMAL" />
+    <result column="low_corePrice_product_id" property="lowCorepriceProductId" jdbcType="INTEGER" />
+    <result column="top_coreProce" property="topCoreproce" jdbcType="DECIMAL" />
+    <result column="top_corePrice_product_id" property="topCorepriceProductId" jdbcType="INTEGER" />
+  </resultMap>
+ <sql id="Base_Column_List" >
+    pk_id, competitor_id, category_id, update_date, top_product_money, top_product_money_id, 
+    low_product_money, low_product_money_id, top_product_people, top_product_people_id, 
+    top_product_people_id_corePrice, low_product_people, low_peoduct_people_id, low_corePrice, 
+    low_corePrice_product_id, top_coreProce, top_corePrice_product_id
+  </sql>
+   <select id="selectByCompetitorId" resultMap="BaseResultMap">
+       select
+       <include refid="Base_Column_List"/>
+        from t_dream_competitor_extra t
+        where t.competitor_id = #{competitorId,jdbcType=INTEGER}
+        limit 1
+   </select>
+   
+   <insert id="insert" parameterType="cn.geekview.analysisSystem.entity.model.TdreamCompetitor">
+    insert into t_dream_competitor_extra (competitor_id,category_id)
+   value(#{pkId,jdbcType=INTEGER},#{categoryId,jdbcType=INTEGER})
+   </insert>
+   
+   <!-- 
+    二级分类排序
+        1、获取二级分类下的所有产品中价格最高的产品的金额以及产品的编号
+                            直接遍历所有的已经分类好的产品按照金额降序排列
+        2、优化：：将查询操作提出来，并进行缓存
+    -->
+   <update id="updateRankingInfo">
+    UPDATE t_dream_competitor_extra e, (
+	    SELECT
+	        t.pk_id ,t.curr_money
+	    FROM
+	        t_dream_product t
+	    WHERE
+	      date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+	    AND  
+	        t.pk_id IN (
+	            SELECT
+	                c.product_id
+	            FROM
+	                t_dream_product_cate c
+	            WHERE
+	                c.comp_id = #{competitorId,jdbcType=INTEGER} 
+	                )
+	ORDER BY t.curr_money DESC LIMIT 1
+	) p
+	SET e.top_product_money = p.curr_money,
+	        e.top_product_money_id = p.pk_id
+	where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+   
+   UPDATE t_dream_competitor_extra e, (
+        SELECT
+            t.pk_id ,t.curr_money
+        FROM
+            t_dream_product t
+        WHERE
+            date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+        AND 
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER} 
+                    )
+    ORDER BY t.curr_money ASC LIMIT 1
+    ) p
+    SET e.low_product_money = p.curr_money,
+            e.low_product_money_id = p.pk_id
+    where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+   
+   UPDATE t_dream_competitor_extra e, (
+        SELECT
+            t.pk_id ,t.support_person + t.share_count + t.focus_count + t.like_count as "support_person" ,t.item_core_price
+        FROM
+            t_dream_product t
+        WHERE
+            date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+        AND 
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER}  
+                )
+    ORDER BY t.curr_money DESC LIMIT 1
+    ) p
+    SET e.top_product_people = p.support_person,
+            e.top_product_people_id = p.pk_id,
+            e.top_product_people_id_corePrice = p.item_core_price
+    where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+   
+   
+   UPDATE t_dream_competitor_extra e,
+     (
+        SELECT
+            t.pk_id ,t.support_person + t.share_count + t.focus_count + t.like_count as "support_person"
+        FROM
+            t_dream_product t
+        WHERE
+            date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+        AND 
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER}
+            )
+    ORDER BY t.curr_money ASC LIMIT 1
+    ) p
+    SET e.low_product_people = p.support_person,
+            e.low_peoduct_people_id = p.pk_id
+    where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+    
+    
+    UPDATE t_dream_competitor_extra e,
+     (
+        SELECT
+            t.pk_id ,t.item_core_price
+        FROM
+            t_dream_product t
+        WHERE
+            date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+        AND 
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER}
+            )
+    ORDER BY t.curr_money DESC LIMIT 1
+    ) p
+    SET e.top_coreProce = p.item_core_price,
+            e.top_corePrice_product_id = p.pk_id
+    where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+    
+    
+    UPDATE t_dream_competitor_extra e,
+     (
+        SELECT
+            t.pk_id ,t.item_core_price
+        FROM
+            t_dream_product t
+        WHERE
+            date_format(t.update_date,'%y-%m-%d') = #{updateDate,jdbcType=VARCHAR} 
+        AND 
+            t.pk_id IN (
+                SELECT
+                    c.product_id
+                FROM
+                    t_dream_product_cate c
+                WHERE
+                    c.comp_id = #{competitorId,jdbcType=INTEGER}
+            )
+    ORDER BY t.curr_money ASC LIMIT 1
+    ) p
+    SET e.low_corePrice = p.item_core_price,
+            e.low_corePrice_product_id = p.pk_id
+    where e.competitor_id = #{competitorId,jdbcType=INTEGER};
+   </update>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamCategoryExtraMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamCategoryExtra" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="top_product_money" property="topProductMoney" jdbcType="DECIMAL" />
+    <result column="top_product_id" property="topProductId" jdbcType="INTEGER" />
+    <result column="low_product_money" property="lowProductMoney" jdbcType="DECIMAL" />
+    <result column="low_product_id" property="lowProductId" jdbcType="INTEGER" />
+    <result column="top_competitor_money" property="topCompetitorMoney" jdbcType="DECIMAL" />
+    <result column="top_competitor_id" property="topCompetitorId" jdbcType="INTEGER" />
+    <result column="low_competitor_money" property="lowCompetitorMoney" jdbcType="DECIMAL" />
+    <result column="low_competitor_id" property="lowCompetitorId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, category_id, update_date, top_product_money, top_product_id, low_product_money, 
+    low_product_id, top_competitor_money, top_competitor_id, low_competitor_money, low_competitor_id
+  </sql>
+ 
+</mapper>

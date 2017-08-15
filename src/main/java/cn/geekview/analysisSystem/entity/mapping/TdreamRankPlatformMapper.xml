@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamRankPlatformMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamRankPlatform" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="website" property="website" jdbcType="INTEGER" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="project_count" property="projectCount" jdbcType="INTEGER" />
+    <result column="recent_money" property="recentMoney" jdbcType="DECIMAL" />
+    <result column="recent_support" property="recentSupport" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, website, target_money, curr_money, finish_per, support_person, project_count, 
+    recent_money, recent_support, update_date
+  </sql>
+  <update id="deleteByUpdateDate">
+    delete from t_dream_rank_platform where to_days(update_date) = to_days(#{updateDate,jdbcType=TIMESTAMP})
+  </update>
+  <select id="selectProductCount" resultType="java.lang.Integer">
+   select sum(p.project_count) as 'project_count'
+    from t_dream_rank_platform p,t_dream_website w
+    where p.website = w.website_code
+      and w.rank_status = 1
+      and p.update_date = #{updateDate,jdbcType=TIMESTAMP}
+  </select>
+</mapper>

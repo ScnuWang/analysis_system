@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamWebsiteMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamWebsite" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="website_code" property="websiteCode" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+    <result column="file_path" property="filePath" jdbcType="VARCHAR" />
+    <result column="website_status" property="websiteStatus" jdbcType="INTEGER" />
+    <result column="website_type" property="websiteType" jdbcType="INTEGER" />
+    <result column="class_grap" property="classGrap" jdbcType="VARCHAR" />
+    <result column="class_analysee" property="classAnalysee" jdbcType="VARCHAR" />
+    <result column="class_temp" property="classTemp" jdbcType="VARCHAR" />
+    <result column="grap_status" property="grapStatus" jdbcType="INTEGER" />
+    <result column="rank_status" property="rankStatus" jdbcType="INTEGER" />
+    <result column="analyse_status" property="analyseStatus" jdbcType="INTEGER" />
+    <result column="listener_status" property="listenerStatus" jdbcType="INTEGER" />
+    <result column="uptime" property="uptime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, website_code, name, nickname, file_path, website_status, website_type, class_grap, 
+    class_analysee, class_temp, grap_status, rank_status, analyse_status, listener_status, 
+    uptime
+  </sql>
+  <select id="getWebsiteByWebsiteCode" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_website
+    where website_code = #{websiteCode,jdbcType=INTEGER}
+  </select>
+   <select id="selectRankWebsiteList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_website
+    where analyse_status = 1
+  </select>
+  
+  
+  
+</mapper>

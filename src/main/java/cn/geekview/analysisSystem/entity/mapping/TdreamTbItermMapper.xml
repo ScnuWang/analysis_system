@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamTbItemMapper">
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamTbItem">
+    <id column="pk_id" jdbcType="INTEGER" property="pkId" />
+    <result column="project_id" jdbcType="INTEGER" property="projectId" />
+    <result column="item_id" jdbcType="VARCHAR" property="itemId" />
+    <result column="item_desc" jdbcType="VARCHAR" property="itemDesc" />
+    <result column="images" jdbcType="VARCHAR" property="images" />
+    <result column="item_price" jdbcType="DECIMAL" property="itemPrice" />
+    <result column="make_days" jdbcType="INTEGER" property="makeDays" />
+    <result column="item_support" jdbcType="INTEGER" property="itemSupport" />
+    <result column="is_express" jdbcType="INTEGER" property="isExpress" />
+    <result column="item_total" jdbcType="INTEGER" property="itemTotal" />
+    <result column="can_buy" jdbcType="INTEGER" property="canBuy" />
+    <result column="buy_url" jdbcType="VARCHAR" property="buyUrl" />
+    <result column="item_title" jdbcType="VARCHAR" property="itemTitle" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk_id, project_id, item_id, item_desc, images, item_price, make_days, item_support, 
+    is_express, item_total, can_buy, buy_url, item_title, update_date
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_dream_tb_iterm
+    where pk_id = #{pkId,jdbcType=INTEGER}
+  </select>
+  <insert id="insert" parameterType="cn.geekview.analysisSystem.entity.model.TdreamTbItem">
+    insert into t_dream_tb_iterm (pk_id, project_id, item_id, 
+      item_desc, images, item_price, 
+      make_days, item_support, is_express, 
+      item_total, can_buy, buy_url, 
+      item_title, update_date)
+    values (#{pkId,jdbcType=INTEGER}, #{projectId,jdbcType=INTEGER}, #{itemId,jdbcType=VARCHAR}, 
+      #{itemDesc,jdbcType=VARCHAR}, #{images,jdbcType=VARCHAR}, #{itemPrice,jdbcType=DECIMAL}, 
+      #{makeDays,jdbcType=INTEGER}, #{itemSupport,jdbcType=INTEGER}, #{isExpress,jdbcType=INTEGER}, 
+      #{itemTotal,jdbcType=INTEGER}, #{canBuy,jdbcType=INTEGER}, #{buyUrl,jdbcType=VARCHAR}, 
+      #{itemTitle,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.geekview.analysisSystem.entity.model.TdreamTbItem">
+    update t_dream_tb_iterm
+    set project_id = #{projectId,jdbcType=INTEGER},
+      item_id = #{itemId,jdbcType=VARCHAR},
+      item_desc = #{itemDesc,jdbcType=VARCHAR},
+      images = #{images,jdbcType=VARCHAR},
+      item_price = #{itemPrice,jdbcType=DECIMAL},
+      make_days = #{makeDays,jdbcType=INTEGER},
+      item_support = #{itemSupport,jdbcType=INTEGER},
+      is_express = #{isExpress,jdbcType=INTEGER},
+      item_total = #{itemTotal,jdbcType=INTEGER},
+      can_buy = #{canBuy,jdbcType=INTEGER},
+      buy_url = #{buyUrl,jdbcType=VARCHAR},
+      item_title = #{itemTitle,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP}
+    where pk_id = #{pkId,jdbcType=INTEGER}
+  </update>
+  <insert id="insertRecordList">
+   insert into t_dream_tb_iterm (pk_id, project_id, item_id, 
+      item_desc, images, item_price, 
+      make_days, item_support, is_express, 
+      item_total, can_buy, buy_url, 
+      item_title, update_date)
+    values 
+   <foreach collection="list" index="index" item="item" separator=",">
+   (#{item.pkId,jdbcType=INTEGER}, #{projectId,jdbcType=INTEGER}, #{item.itemId,jdbcType=VARCHAR}, 
+      #{item.itemDesc,jdbcType=VARCHAR}, #{item.images,jdbcType=VARCHAR},#{item.itemPrice,jdbcType=DECIMAL}, 
+      #{item.makeDays,jdbcType=INTEGER}, #{item.itemSupport,jdbcType=INTEGER}, #{item.isExpress,jdbcType=INTEGER}, 
+      #{item.itemTotal,jdbcType=INTEGER}, #{item.canBuy,jdbcType=INTEGER}, #{item.buyUrl,jdbcType=VARCHAR}, 
+      #{item.itemTitle,jdbcType=VARCHAR},#{item.updateDate,jdbcType=TIMESTAMP})
+  	</foreach>
+  </insert>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.remotedata.entity.dao.XmProjectMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamXmProject" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="original_id" property="originalId" jdbcType="VARCHAR" />
+    <result column="project_name" property="projectName" jdbcType="VARCHAR" />
+    <result column="project_desc" property="projectDesc" jdbcType="VARCHAR" />
+    <result column="project_url" property="projectUrl" jdbcType="VARCHAR" />
+    <result column="project_image" property="projectImage" jdbcType="VARCHAR" />
+    <result column="project_video" property="projectVideo" jdbcType="VARCHAR" />
+    <result column="project_qrcode" property="projectQrcode" jdbcType="VARCHAR" />
+    <result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+    <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+    <result column="project_status" property="projectStatus" jdbcType="VARCHAR" />
+    <result column="status_value" property="statusValue" jdbcType="INTEGER" />
+    <result column="focus_count" property="focusCount" jdbcType="INTEGER" />
+    <result column="support_person" property="supportPerson" jdbcType="INTEGER" />
+    <result column="money_currency" property="moneyCurrency" jdbcType="VARCHAR" />
+    <result column="target_money" property="targetMoney" jdbcType="DECIMAL" />
+    <result column="curr_money" property="currMoney" jdbcType="DECIMAL" />
+    <result column="finish_per" property="finishPer" jdbcType="INTEGER" />
+    <result column="remain_day" property="remainDay" jdbcType="INTEGER" />
+    <result column="person_name" property="personName" jdbcType="VARCHAR" />
+    <result column="person_image" property="personImage" jdbcType="VARCHAR" />
+    <result column="person_desc" property="personDesc" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, update_date, original_id, project_name, project_desc, project_url, project_image, 
+    project_video, project_qrcode, begin_date, end_date, project_status, status_value, 
+    focus_count, support_person, money_currency, target_money, curr_money, finish_per, 
+    remain_day, person_name, person_image, person_desc
+  </sql>
+ <resultMap extends="BaseResultMap" id="ViewResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamXmProject">
+    <result column="product_enabled" jdbcType="INTEGER" property="productEnabled" />
+    <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+    <collection javaType="list" ofType="cn.geekview.analysisSystem.entity.model.TdreamXmItem" property="itemList">
+        <result column="item_price" jdbcType="DECIMAL" property="itemPrice" />
+        <result column="item_support" jdbcType="INTEGER" property="itemSupport" />
+        <result column="item_total" jdbcType="INTEGER" property="itemTotal" />
+    </collection> 
+  </resultMap>
+  <select id="getProductByOriginIdWithDaySpace" resultMap="ViewResultMap" parameterType="java.util.HashMap">
+    select
+    <include refid="Base_Column_List"/>
+    from t_dream_xm_project
+    where original_id = #{originId,jdbcType=INTEGER}
+  </select>
+    
+  <select id="selectListByUpdateDate" resultMap="ViewResultMap">
+ SELECT
+    m.*, n.item_price,
+    n.item_support,
+    n.item_total
+FROM
+    (
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            t_dream_xm_project p
+        WHERE
+            p.update_date = #{updateDate,jdbcType=TIMESTAMP} ) m 
+        LEFT JOIN (
+            SELECT
+                *
+            FROM
+                t_dream_xm_iterm i
+            WHERE
+                i.update_date = #{updateDate,jdbcType=TIMESTAMP}) n 
+                ON m.pk_id = n.project_id
+  </select>
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamTbAnalysisMapper">
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamTbAnalysis">
+    <id column="pk_id" jdbcType="INTEGER" property="pkId" />
+    <result column="gv_index" jdbcType="INTEGER" property="gvIndex" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="focus_count" jdbcType="INTEGER" property="focusCount" />
+    <result column="support_person" jdbcType="INTEGER" property="supportPerson" />
+    <result column="currency_id" jdbcType="INTEGER" property="currencyId" />
+    <result column="target_money" jdbcType="DECIMAL" property="targetMoney" />
+    <result column="curr_money" jdbcType="DECIMAL" property="currMoney" />
+    <result column="average_money" jdbcType="DECIMAL" property="averageMoney" />
+    <result column="item_core_price" jdbcType="DECIMAL" property="itemCorePrice" />
+    <result column="item_core_total" jdbcType="INTEGER" property="itemCoreTotal" />
+    <result column="item_core_support" jdbcType="INTEGER" property="itemCoreSupport" />
+    <result column="flow_value" jdbcType="INTEGER" property="flowValue" />
+    <result column="money_value" jdbcType="INTEGER" property="moneyValue" />
+    <result column="item_core_value" jdbcType="INTEGER" property="itemCoreValue" />
+    <result column="finish_per" jdbcType="INTEGER" property="finishPer" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk_id, gv_index, product_id, update_date, focus_count,support_person, 
+    currency_id, target_money, curr_money, average_money, item_core_price, item_core_total, 
+    item_core_support, flow_value, money_value, item_core_value, finish_per
+  </sql>
+
+  <insert id="insert" keyProperty="pkId" parameterType="cn.geekview.analysisSystem.entity.model.TdreamTbAnalysis" useGeneratedKeys="true">
+    insert into t_dream_tb_analysis (pk_id, gv_index, product_id, 
+      update_date, focus_count,support_person, currency_id, 
+      target_money, curr_money, average_money, 
+      item_core_price, item_core_total, item_core_support, 
+      flow_value, money_value, item_core_value, 
+      finish_per)
+    values (#{pkId,jdbcType=INTEGER}, #{gvIndex,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{focusCount,jdbcType=INTEGER},#{supportPerson,jdbcType=INTEGER}, #{currencyId,jdbcType=INTEGER}, 
+      #{targetMoney,jdbcType=DECIMAL}, #{currMoney,jdbcType=DECIMAL}, #{averageMoney,jdbcType=DECIMAL}, 
+      #{itemCorePrice,jdbcType=DECIMAL}, #{itemCoreTotal,jdbcType=INTEGER}, #{itemCoreSupport,jdbcType=INTEGER}, 
+      #{flowValue,jdbcType=INTEGER}, #{moneyValue,jdbcType=INTEGER}, #{itemCoreValue,jdbcType=INTEGER}, 
+      #{finishPer,jdbcType=INTEGER})
+  </insert>
+ 
+  <select id="selectPrevAnalysis" resultMap="BaseResultMap">
+    select *
+    from t_dream_tb_analysis
+    where product_id = #{productId,jdbcType=INTEGER}
+     and update_date &lt; #{updateDate,jdbcType=TIMESTAMP}
+     order by update_date desc
+      limit 1
+  </select>
+  <update id="updateProduct">
+     update t_dream_product
+    <set>
+      <if test="gvIndex != null">
+        gv_index = #{gvIndex,jdbcType=INTEGER},
+      </if>
+      <if test="currencyId != null">
+        currency_id = #{currencyId,jdbcType=INTEGER},
+      </if>
+      <if test="averageMoney != null">
+        average_money = #{averageMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="targetMoney != null">
+        target_money_org = #{targetMoney,jdbcType=DECIMAL},
+        target_money = #{targetMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="currMoney != null">
+        curr_money_org = #{currMoney,jdbcType=DECIMAL},
+	    curr_money = #{currMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="itemCorePrice != null">
+        item_core_price_org = #{itemCorePrice,jdbcType=DECIMAL},
+        item_core_price = #{itemCorePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="supportPerson != null">
+        support_person = #{supportPerson,jdbcType=INTEGER},
+      </if>
+      <if test="focusCount != null">
+      	focus_count = #{focusCount,jdbcType=INTEGER},
+      </if>
+      <if test="finishPer != null">
+        finish_per = #{finishPer,jdbcType=INTEGER},
+      </if>
+      <if test="updateDate != null">
+        update_date = #{updateDate,jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where pk_id = #{productId,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByProductId">
+    DELETE FROM
+    t_dream_tb_analysis 
+    WHERE update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and product_id = #{productId,jdbcType=INTEGER}
+  </delete>
+</mapper>

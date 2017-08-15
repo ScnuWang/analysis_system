@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.remotedata.entity.dao.XmItemMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamXmItem" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="project_id" property="projectId" jdbcType="INTEGER" />
+    <result column="item_id" property="itemId" jdbcType="VARCHAR" />
+    <result column="item_desc" property="itemDesc" jdbcType="VARCHAR" />
+    <result column="images" property="images" jdbcType="VARCHAR" />
+    <result column="item_price" property="itemPrice" jdbcType="DECIMAL" />
+    <result column="make_days" property="makeDays" jdbcType="INTEGER" />
+    <result column="item_support" property="itemSupport" jdbcType="INTEGER" />
+    <result column="is_express" property="isExpress" jdbcType="INTEGER" />
+    <result column="item_total" property="itemTotal" jdbcType="INTEGER" />
+    <result column="can_buy" property="canBuy" jdbcType="INTEGER" />
+    <result column="buy_url" property="buyUrl" jdbcType="VARCHAR" />
+    <result column="item_title" property="itemTitle" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, project_id, item_id, item_desc, images, item_price, make_days, item_support, 
+    is_express, item_total, can_buy, buy_url, item_title, update_date
+  </sql>
+ 
+  <select id="getItemsByProjectId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+     from t_dream_xm_iterm
+    where project_id = #{projectId,jdbcType=INTEGER}
+  </select>
+</mapper>

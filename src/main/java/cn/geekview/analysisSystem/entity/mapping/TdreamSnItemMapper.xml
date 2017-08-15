@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamSnItemMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamSnItem" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="project_id" property="projectId" jdbcType="INTEGER" />
+    <result column="item_desc" property="itemDesc" jdbcType="VARCHAR" />
+    <result column="item_price" property="itemPrice" jdbcType="DECIMAL" />
+    <result column="item_support" property="itemSupport" jdbcType="INTEGER" />
+    <result column="item_total" property="itemTotal" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, project_id, item_desc, item_price, item_support, item_total, update_date
+  </sql>
+    <select id="getItemsByProjectId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+     from t_dream_sn_iterm
+    where project_id = #{projectId,jdbcType=INTEGER}
+  </select>
+</mapper>

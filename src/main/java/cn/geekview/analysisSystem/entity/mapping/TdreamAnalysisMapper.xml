@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamAnalysisMapper">
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamAnalysis">
+    <id column="pk_id" jdbcType="INTEGER" property="pkId" />
+    <result column="gv_index" jdbcType="INTEGER" property="gvIndex" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="share_count" jdbcType="INTEGER" property="shareCount" />
+    <result column="support_person" jdbcType="INTEGER" property="supportPerson" />
+    <result column="currency_id" jdbcType="INTEGER" property="currencyId" />
+    <result column="curr_money_org" jdbcType="DECIMAL" property="currMoneyOrg" />
+    <result column="curr_money" jdbcType="DECIMAL" property="currMoney" />
+    <result column="average_money" jdbcType="DECIMAL" property="averageMoney" />
+    <result column="item_core_price_org" jdbcType="DECIMAL" property="itemCorePriceOrg" />
+    <result column="item_core_price" jdbcType="DECIMAL" property="itemCorePrice" />
+    <result column="item_core_total" jdbcType="INTEGER" property="itemCoreTotal" />
+    <result column="item_core_support" jdbcType="INTEGER" property="itemCoreSupport" />
+    <result column="flow_value" jdbcType="INTEGER" property="flowValue" />
+    <result column="money_value" jdbcType="INTEGER" property="moneyValue" />
+    <result column="item_core_value" jdbcType="INTEGER" property="itemCoreValue" />
+    <result column="finish_per" jdbcType="INTEGER" property="finishPer" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk_id, gv_index, update_date, share_count, support_person, currency_id, 
+    curr_money_org, curr_money, average_money, item_core_price_org, item_core_price, item_core_total, 
+    item_core_support, flow_value, money_value, item_core_value, finish_per
+  </sql>
+  <select id="selectAnalysisList" resultMap="BaseResultMap">
+    select  pk_id, gv_index, update_date, support_person, currency_id, 
+		   	flow_value, money_value, item_core_value, finish_per,average_money,
+		   	item_core_total,item_core_support,
+		<if test="websiteCode == 1 or websiteCode == 2 or websiteCode == 5 or websiteCode == 6 or 
+				  websiteCode == 7 or websiteCode == 8 or websiteCode == 9 or websiteCode == 10 or
+				  websiteCode == 11 or websiteCode == 15">
+			curr_money, item_core_price
+			<if test="websiteCode == 1">
+			    from t_dream_tb_analysis
+		    </if>
+		    <if test="websiteCode == 2">
+			    from t_dream_jd_analysis
+		    </if>
+		    <if test="websiteCode == 5">
+			    from t_dream_zc_analysis
+		    </if>
+		    <if test="websiteCode == 6 or websiteCode == 8">
+			    from t_dream_zc_analysis
+		    </if>
+		    <if test="websiteCode == 7">
+			    from t_dream_sn_analysis
+		    </if>
+		    <if test="websiteCode == 9">
+			    from t_dream_fh_analysis
+		    </if>
+		    <if test="websiteCode == 10">
+			    from t_dream_qj_analysis
+		    </if>
+		    <if test="websiteCode == 11">
+			    from t_dream_tm_analysis
+		    </if>
+		    <if test="websiteCode == 15">
+			    from t_dream_xm_analysis
+		    </if>
+	    </if>
+	    <if test="websiteCode == 3">
+			curr_money,curr_money_org, item_core_price,item_core_price_org
+			from t_dream_ks_analysis
+	    </if>
+	    <if test="websiteCode == 4">
+		   	(curr_money_fund_org+curr_money_forever_org)  as curr_money_org,
+		   	(curr_money_fund+curr_money_forever)  as curr_money,
+		   	item_core_price_org,item_core_price
+		 	from t_dream_in_analysis
+	    </if>
+	    where product_id = #{productId,jdbcType=INTEGER}
+    	order by update_date asc
+  </select>
+</mapper>

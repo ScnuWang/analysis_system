@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamProductStatMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProductStat" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="INTEGER" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="money_max" property="moneyMax" jdbcType="DECIMAL" />
+    <result column="money_min" property="moneyMin" jdbcType="DECIMAL" />
+    <result column="money_avg" property="moneyAvg" jdbcType="DECIMAL" />
+    <result column="money_mod" property="moneyMod" jdbcType="DECIMAL" />
+    <result column="support_max" property="supportMax" jdbcType="INTEGER" />
+    <result column="support_min" property="supportMin" jdbcType="INTEGER" />
+    <result column="support_avg" property="supportAvg" jdbcType="INTEGER" />
+    <result column="support_mod" property="supportMod" jdbcType="INTEGER" />
+    <result column="finish_max" property="finishMax" jdbcType="INTEGER" />
+    <result column="finish_min" property="finishMin" jdbcType="INTEGER" />
+    <result column="finish_avg" property="finishAvg" jdbcType="INTEGER" />
+    <result column="finish_mod" property="finishMod" jdbcType="INTEGER" />
+    <result column="capita_max" property="capitaMax" jdbcType="DECIMAL" />
+    <result column="capita_min" property="capitaMin" jdbcType="DECIMAL" />
+    <result column="capita_avg" property="capitaAvg" jdbcType="DECIMAL" />
+    <result column="capita_mod" property="capitaMod" jdbcType="DECIMAL" />
+  </resultMap>
+  <resultMap id="ExtendResultMap" extends="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamProductStat" >
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    pk_id, category_id, update_date, money_max, money_min, money_avg, money_mod, support_max, 
+    support_min, support_avg, support_mod, finish_max, finish_min, finish_avg, finish_mod, 
+    capita_max, capita_min, capita_avg, capita_mod
+  </sql>
+ <delete id="deleteByUpdateDate">
+  delete from t_dream_product_stat where to_days(update_date) = to_days(#{updateDate,jdbcType=TIMESTAMP})
+  </delete>
+  <insert id="insert" parameterType="cn.geekview.analysisSystem.entity.model.TdreamProductStat">
+    insert into t_dream_product_stat (pk_id, category_id, update_date, 
+      money_max, money_min, money_avg, 
+      money_mod, support_max, support_min, 
+      support_avg, support_mod, finish_max, 
+      finish_min, finish_avg, finish_mod, 
+      capita_max, capita_min, capita_avg, 
+      capita_mod)
+    values (#{pkId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{moneyMax,jdbcType=DECIMAL}, #{moneyMin,jdbcType=DECIMAL}, #{moneyAvg,jdbcType=DECIMAL}, 
+      #{moneyMod,jdbcType=DECIMAL}, #{supportMax,jdbcType=INTEGER}, #{supportMin,jdbcType=INTEGER}, 
+      #{supportAvg,jdbcType=INTEGER}, #{supportMod,jdbcType=INTEGER}, #{finishMax,jdbcType=INTEGER}, 
+      #{finishMin,jdbcType=INTEGER}, #{finishAvg,jdbcType=INTEGER}, #{finishMod,jdbcType=INTEGER}, 
+      #{capitaMax,jdbcType=DECIMAL}, #{capitaMin,jdbcType=DECIMAL}, #{capitaAvg,jdbcType=DECIMAL}, 
+      #{capitaMod,jdbcType=DECIMAL})
+  </insert>
+   <select id="selectStatisticsByCategory" resultMap="BaseResultMap">
+    SELECT MAX(t.curr_money) money_max,MIN(t.curr_money) money_min,AVG(t.curr_money) money_avg,
+           MAX(t.average_money) capita_max,MIN(t.average_money) capita_min,AVG(t.average_money) capita_avg,
+           MAX(t.support_person) support_max,MIN(t.support_person) support_min,AVG(t.support_person) support_avg,
+           MAX(t.finish_per) finish_max,MIN(t.finish_per) finish_min,AVG(t.finish_per) finish_avg
+     from t_dream_product t,t_dream_product_cate pc,t_dream_website w 
+    where t.pk_id = pc.product_id
+      and pc.category_id = #{categoryId,jdbcType=INTEGER}
+      and t.product_enabled = 1
+      and t.status_value not in (1,5)
+      and t.website = w.website_code
+      and w.rank_status = 1
+  </select>
+  <select id="selectByCategoryId" resultMap="ExtendResultMap">
+    select 
+    t.*,c.category_name
+    from t_dream_product_stat t,t_dream_category c
+    where t.category_id = #{categoryId,jdbcType=INTEGER}
+    and t.update_date = #{updateDate,jdbcType=TIMESTAMP}
+    and c.pk_id = #{categoryId,jdbcType=INTEGER}
+    ORDER BY t.pk_id DESC
+    limit 1
+  </select>
+  
+</mapper>

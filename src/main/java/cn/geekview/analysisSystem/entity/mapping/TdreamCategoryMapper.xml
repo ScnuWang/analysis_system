@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.geekview.analysisSystem.entity.dao.TdreamCategoryMapper" >
+  <resultMap id="BaseResultMap" type="cn.geekview.analysisSystem.entity.model.TdreamCategory" >
+    <id column="pk_id" property="pkId" jdbcType="INTEGER" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+    <result column="category_status" property="categoryStatus" jdbcType="INTEGER" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="category_desc" property="categoryDesc" jdbcType="VARCHAR" />
+    <result column="cover" property="cover" jdbcType="VARCHAR" />
+    <result column="cate_desc_outer" property="cateDescOuter" jdbcType="VARCHAR" />
+    <result column="recent_money" property="recentMoney" jdbcType="DECIMAL" />
+    <result column="recent_money_rank" property="recentMoneyRank" jdbcType="INTEGER" />
+    <result column="total_money" property="totalMoney" jdbcType="DECIMAL" />
+    <result column="total_money_rank" property="totalMoneyRank" jdbcType="INTEGER" />
+    <result column="total_product" property="totalProduct" jdbcType="INTEGER" />
+    <result column="total_product_rank" property="totalProductRank" jdbcType="INTEGER" />
+    <result column="total_support" property="totalSupport" jdbcType="INTEGER" />
+    <result column="total_support_rank" property="totalSupportRank" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    pk_id, parent_id, category_name, category_status, update_user, update_date, category_desc, 
+    cover, cate_desc_outer, recent_money, recent_money_rank, total_money, total_money_rank, 
+    total_product, total_product_rank, total_support, total_support_rank
+  </sql>
+  <select id="getCategoryList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List"/>
+    from t_dream_category t
+    where t.category_status = 1
+  </select>
+   <select id="selectCategoryList" resultMap="BaseResultMap">
+   select DISTINCT c.pk_id 
+     from t_dream_category c ,t_dream_product_cate pc 
+    where pc.category_id = c.pk_id 
+      and c.category_status = 1
+    ORDER BY c.pk_id asc
+  </select>
+  <update id="updateCategoryInfo">
+   SET @rownum = 0;
+    UPDATE  t_dream_category t,
+    (
+        select @rownum :=@rownum + 1 AS rownum,
+              category_id,growth_money 
+         from (
+                 select l.category_id,sum(l.growth_money) as growth_money 
+                   from (
+                        select g.growth_money,pc.category_id
+                         from t_dream_rank_growth g,t_dream_product_cate pc,t_dream_category c
+                        where g.product_id = pc.product_id
+                          and pc.category_id = c.pk_id
+                          and c.category_status = 1
+                           and TO_DAYS(#{updateDate,jdbcType=TIMESTAMP}) - TO_DAYS(g.update_date) &lt; #{day,jdbcType=INTEGER}
+                        ) l  GROUP BY l.category_id 
+             ) m  ORDER BY m.growth_money desc
+    ) n
+    set t.recent_money = n.growth_money,
+        t.recent_money_rank = n.rownum
+    where t.pk_id = n.category_id;
+  
+  
+    SET @rownum = 0;
+    UPDATE  t_dream_category t,
+    (
+        select @rownum :=@rownum + 1 AS rownum,
+              category_id,curr_money 
+         from (
+                 select l.category_id,sum(l.curr_money) as curr_money 
+                   from (
+                        select p.curr_money,pc.category_id
+                         from t_dream_product p,t_dream_product_cate pc,t_dream_category c
+                        where p.pk_id = pc.product_id
+                          and pc.category_id = c.pk_id
+                          and c.category_status = 1
+                          and p.status_value NOT in (1,5)
+                          and p.product_enabled = 1
+                        ) l  GROUP BY l.category_id 
+             ) m  ORDER BY m.curr_money desc
+    ) n
+    set t.total_money = n.curr_money,
+        t.total_money_rank = n.rownum
+    where t.pk_id = n.category_id;
+    
+    SET @rownum = 0;
+    UPDATE  t_dream_category t,
+    (
+        select @rownum :=@rownum + 1 AS rownum,
+              category_id,support_person 
+         from (
+                 select l.category_id,sum(l.support_person) as support_person 
+                   from (
+                        select p.support_person,pc.category_id
+                         from t_dream_product p,t_dream_product_cate pc,t_dream_category c
+                        where p.pk_id = pc.product_id
+                          and pc.category_id = c.pk_id
+                          and c.category_status = 1
+                          and p.status_value NOT in (1,5)
+                          and p.product_enabled = 1
+                        ) l  GROUP BY l.category_id 
+             ) m  ORDER BY m.support_person desc
+    ) n
+    set t.total_support = n.support_person,
+        t.total_support_rank = n.rownum
+    where t.pk_id = n.category_id;
+ 
+    SET @rownum = 0;
+    UPDATE  t_dream_category t,
+    (
+        select @rownum :=@rownum + 1 AS rownum,
+              category_id,product 
+         from (
+                 select l.category_id,count(*) as product 
+                   from (
+                        select pc.category_id
+                         from t_dream_product p,t_dream_product_cate pc,t_dream_category c
+                        where p.pk_id = pc.product_id
+                          and pc.category_id = c.pk_id
+                          and c.category_status = 1
+                          and p.status_value NOT in (1,5)
+                          and p.product_enabled = 1
+                        ) l  GROUP BY l.category_id 
+             ) m  ORDER BY m.product desc
+    ) n
+    set t.total_product = n.product,
+        t.total_product_rank = n.rownum
+    where t.pk_id = n.category_id;
+  </update>
+</mapper>
